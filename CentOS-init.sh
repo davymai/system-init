@@ -440,6 +440,8 @@ fs.file-max = 655350
 vm.swappiness = 0
 vm.dirty_ratio = 20
 vm.dirty_background_ratio = 5
+# overcommit_memory 内存机制
+vm.overcommit_memory=1
 fs.suid_dumpable = 0
 net.core.somaxconn = 65535
 net.core.netdev_max_backlog = 262144
