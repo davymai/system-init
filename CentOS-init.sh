@@ -178,16 +178,18 @@ install_tools() {
   #yum install -y vim authconfig libselinux-utils initscripts net-tools
   # 安装 wget vim net-tools htop supervisor
   cont "正在安装 ${BYellow}wget vim zip unzip lrzsz net-tools htop supervisor${Color_off} ...\n"
-  yum install -y wget vim zip unzip lrzsz net-tools htop supervisor
-  # 启动 supervisor 进程管理
-  echo ''
-  cont "正在启动 ${BGreen}supervisor${Color_off} ..."
-  systemctl enable supervisord
-  if ! systemctl start supervisord; then
-    error "supervisor 启动失败, 请检查配置。\n"
-  else
-    success "软件工具包安装完成。\n"
-  fi
+  yum install -y wget vim zip unzip lrzsz net-tools htop 
+  # supervisor 进程管理
+  #yum install -y supervisor
+  #echo ''
+  #cont "正在启动 ${BGreen}supervisor${Color_off} ..."
+  #systemctl enable supervisord
+  #if ! systemctl start supervisord; then
+  #  error "supervisor 启动失败, 请检查配置。\n"
+  #else
+  #  success "软件工具包安装完成。\n"
+  #fi
+  success "软件工具包安装完成。\n"
 }
 
 # 删除无用的用户和组
@@ -207,10 +209,14 @@ delete_useless_user() {
 
 # 禁用不使用服务
 disable_services() {
-  info "*** 禁用 postfix 服务 ***"
+  info "*** 精简开机启动 ***"
   cont "正在禁用 ${BRed}postfix${Color_off} 服务..."
-  systemctl stop postfix && systemctl disable postfix
-  success "禁用 postfix 服务完成。\n"
+  systemctl disable auditd.service
+  systemctl disable postfix.service
+  systemctl disable dbus-org.freedesktop.NetworkManager.service
+  echo '#systemctl list-unit-files | grep -E "auditd|postfix|dbus-org\.freedesktop\.NetworkManager"'
+ systemctl list-unit-files | grep -E "auditd|postfix|dbus-org\.freedesktop\.NetworkManager"
+  success "完成精简开机启动\n"
 }
 
 # 密码规则配置
@@ -256,7 +262,7 @@ create_user() {
   info "*** 创建新用户 ***"
   while :; do
     read -p "用户名: " user_name
-    if [[ "$user_name" =~ .*root* | .*admin* ]]; then
+    if [[ "$user_name" =~ .*root* || .*admin* ]]; then
       warn "用户名不能以 ${BRed}admin${Color_off} 或 ${BRed}root${Color_off} 开头, 请重新输入\n"
     elif [ "$user_name" = "" ]; then
       warn "用户名不能为<空>, 请重新输入\n"
@@ -793,7 +799,7 @@ create_mysql_user() {
   while :; do
     printf "请输入 MySQL 用户名: "
     read -r mysql_user_name
-    if [[ "$mysql_user_name" =~ .*root* | .*adm* ]]; then
+    if [[ "$mysql_user_name" =~ .*root* || .*adm* ]]; then
       warn "用户名不能为 ${BRed}root${Color_off} 或 ${BRed}admin{Color_off},  请重新输入\n"
     else
       break
@@ -996,16 +1002,16 @@ main() {
   config_firewall
   config_sysctl
   install_nginx
-  install_golang
-  install_git
-  install_mongodb
-  config_mongodb_port
-  install_mysql8
-  config_mysql8_port_rootpasswd
-  create_mysql_user
-  install_redis
-  config_redis_port
-  config_redis_password
+  #install_golang
+  #install_git
+  #install_mongodb
+  #config_mongodb_port
+  #install_mysql8
+  #config_mysql8_port_rootpasswd
+  #create_mysql_user
+  #install_redis
+  #config_redis_port
+  #config_redis_password
   #config_minifire_lobby
   other
 }
