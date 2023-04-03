@@ -9,7 +9,7 @@
 #
 #   Author: 大威(Davy) ( i[at]davymai.com )
 #
-#   Version: 2.89
+#   Version: 2.90
 #################################################
 # 设置参数
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
@@ -38,7 +38,7 @@ BCyan='\033[1;36m'   # 青色
 BWhite='\033[1;37m'  # 白色
 
 # 版本信息
-VERSION='2.89'
+VERSION='2.90'
 # 系统信息
 SYSTEM="$(uname -s)"
 INFO=$(cat /etc/redhat-release)
@@ -78,7 +78,7 @@ welcome() {
   |                       初始化系统以确保安全性和性能                     |
   +------------------------------------------------------------------------+
         System:  ${INFO%\\l}    Version: ${VERSION}    
-        updated date: 2022-11-24                         by: 大威(Davy)
+        updated date: 2023-04-03                         by: 大威(Davy)
 
                      初始化脚本 ${BRed}5 ${Cyan}秒后开始, 按 ${Green}ctrl C ${Cyan}取消
 ${Color_off}"
