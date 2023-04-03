@@ -1051,6 +1051,8 @@ systemctl restart sshd
 ${Blue}================================${Color_off}
 ${Green}内网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$ipadd${Color_off}
 ${Green}互联网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$MYIP${Color_off}"
+# 清除历史记录
+cat /dev/null > ~/.bash_history && history -c
 # 判断 nginx 是否存在
 if [ -f "/usr/sbin/nginx" ]; then
   msg "${Blue}================================\n${White}nginx 版本: ${BCyan}$nginx_version${Color_off}\n${White}nginx http 端口: ${BYellow}$http_port${Color_off}\n${White}nginx https 端口: ${BYellow}$https_port${Color_off}"
