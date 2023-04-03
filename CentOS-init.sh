@@ -106,6 +106,7 @@ config_nameserver() {
   #else
   #grep "options" /etc/resolv.conf >>/dev/null
   #if [ $? -eq 0 ]; then
+  curl https://gitlab.com/ineo6/hosts/-/raw/master/next-hosts >> /etc/hosts
   if [ "$ns_cf_check" -eq 0 ] && [ "$ns_opt_check" -eq 0 ]; then
     cont "添加 ${Green}Google DNS${Color_off} 和 DNS 查询规则..."
     sed -i '$ a\nameserver 8.8.4.4\noptions timeout:1 attempts:3 single-request-reopen' /etc/resolv.conf
