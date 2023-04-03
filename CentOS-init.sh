@@ -262,7 +262,7 @@ create_user() {
   info "*** 创建新用户 ***"
   while :; do
     read -p "用户名: " user_name
-    if [[ "$user_name" =~ .*root* || .*admin* ]]; then
+    if [[ "$user_name" =~ .*root.* || "$user_name" =~ .*admin.* ]]; then
       warn "用户名不能以 ${BRed}admin${Color_off} 或 ${BRed}root${Color_off} 开头, 请重新输入\n"
     elif [ "$user_name" = "" ]; then
       warn "用户名不能为<空>, 请重新输入\n"
@@ -799,7 +799,7 @@ create_mysql_user() {
   while :; do
     printf "请输入 MySQL 用户名: "
     read -r mysql_user_name
-    if [[ "$mysql_user_name" =~ .*root* || .*adm* ]]; then
+    if [[ "$mysql_user_name" =~ .*root.* || "$mysql_user_name" =~ .*adm.* ]]; then
       warn "用户名不能为 ${BRed}root${Color_off} 或 ${BRed}admin{Color_off},  请重新输入\n"
     else
       break
