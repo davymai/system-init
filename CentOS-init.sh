@@ -437,25 +437,31 @@ config_sysctl() {
   cat /dev/null >/etc/sysctl.conf
   cat >/etc/sysctl.conf <<EOF
 fs.file-max = 655350
+fs.suid_dumpable = 0
 vm.swappiness = 0
 vm.dirty_ratio = 20
-vm.dirty_background_ratio = 5
 # overcommit_memory 内存机制
 vm.overcommit_memory=1
-fs.suid_dumpable = 0
-net.core.somaxconn = 65535
-net.core.netdev_max_backlog = 262144
-# 开启SYN洪水攻击保护
-net.ipv4.tcp_syncookies = 1
+vm.dirty_background_ratio = 5
 # 开启重用。允许将TIME-WAIT sockets 重新用于新的TCP 连接
+net.ipv4.tcp_fin_timeout = 30
 net.ipv4.tcp_tw_reuse = 1
 net.ipv4.tcp_tw_recycle = 0
-net.ipv4.tcp_fin_timeout = 30
+# 开启SYN洪水攻击保护
+net.ipv4.tcp_syncookies = 1
 # 当keepalive 起用的时候, TCP 发送keepalive 消息的频度。缺省是2 小时
 net.ipv4.tcp_keepalive_time = 600
 # timewait的数量, 默认18000
-net.ipv4.tcp_max_tw_buckets = 8000
-# 开启反向路径过滤
+net.ipv4.tcp_max_tw_buckets = 36000
+net.core.somaxconn = 262144
+net.core.netdev_max_backlog = 262144
+net.ipv4.tcp_max_orphans = 262144
+net.netfilter.nf_conntrack_max = 25000000
+net.netfilter.nf_conntrack_tcp_timeout_established = 180
+net.netfilter.nf_conntrack_tcp_timeout_time_wait = 120
+net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60
+net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 120
+# 开启反向路径过滤(增强网络安全)
 net.ipv4.conf.all.rp_filter = 1
 # IP 转发, 默认关闭
 #net.ipv4.ip_forward=1
