@@ -12,6 +12,8 @@
 #   Version: 2.90
 #################################################
 # 设置参数
+. /etc/rc.d/init.d/functions
+export LANG=zh_CN.UTF-8
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
 # 初始化脚本设置 {{{
