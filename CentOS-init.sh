@@ -1040,9 +1040,10 @@ main
 # 初始化计时结束
 endTime=$(date +%Y%m%d-%H:%M)
 endTime_s=$(date +%s)
-# 计算用时分钟
+# 计算用时分钟 $startTime ---> $endTime
 sumTime=$((($endTime_s - $startTime_s) / 60))
-#$startTime ---> $endTime
+# 内网IP地址
+local_ipadd=$(ip addr | awk '/^[0-9]+: / {}; /inet.*global/ {print gensub(/(.*)\/(.*)/, "\\1", "g", $2)}')
 msg "\n${Cyan}系统初始化用时: ${BPurple}$sumTime${Color_off}${Cyan} 分钟${Color_off}${Cyan}
  +------------------------------------------------------------------------+
  |             ${Green}系统初始化完成，请保存好以下信息并执行重启系统!${Cyan}            |
@@ -1069,7 +1070,6 @@ ${Blue}请牢记您的密码!!!
 sed -i '/^PasswordAuthentication no/s/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 systemctl restart sshd
 ${Blue}================================${Color_off}
-local_ipadd=$(ip addr | awk '/^[0-9]+: / {}; /inet.*global/ {print gensub(/(.*)\/(.*)/, "\\1", "g", $2)}')
 ${Green}内网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$local_ipadd${Color_off}
 ${Green}互联网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$MYIP${Color_off}"
 # 清除历史记录
