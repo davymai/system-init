@@ -106,7 +106,7 @@ config_nameserver() {
   #else
   #grep "options" /etc/resolv.conf >>/dev/null
   #if [ $? -eq 0 ]; then
-  curl https://gitlab.com/ineo6/hosts/-/raw/master/next-hosts >> /etc/hosts
+  sudo curl https://gitlab.com/ineo6/hosts/-/raw/master/next-hosts >> /etc/hosts
   if [ "$ns_cf_check" -eq 0 ] && [ "$ns_opt_check" -eq 0 ]; then
     cont "添加 ${Green}Google DNS${Color_off} 和 DNS 查询规则..."
     sed -i '$ a\nameserver 8.8.4.4\noptions timeout:1 attempts:3 single-request-reopen' /etc/resolv.conf
@@ -509,7 +509,7 @@ config_ipadd() {
   info "*** 配置 IP 地址 ***"
   printf "当前网卡名称为: %s\n" "$NIC"
   printf "输入IP地址 (留空默认: %s): " "$ipadd"
-  read -r IPADD
+  read -r IP_ADD
   printf "输入网关地址 (留空默认: %s): " "$gateway"
   read -r GATEWAY
   printf "输入子网掩码 (留空默认: %s): " "$netmask"
@@ -520,10 +520,10 @@ config_ipadd() {
   read -r DNS2
   sed -i 's/BOOTPROTO=.*/BOOTPROTO="static"/g' /etc/sysconfig/network-scripts/ifcfg-"$NIC"
 
-  if [ "$IPADD" = '' ]; then
+  if [ "$IP_ADD" = '' ]; then
     sed -i '$ a\IPADDR='"$ipadd"'' /etc/sysconfig/network-scripts/ifcfg-"$NIC"
   else
-    sed -i '$ a\IPADDR='"$IPADD"'' /etc/sysconfig/network-scripts/ifcfg-"$NIC"
+    sed -i '$ a\IPADDR='"$IP_ADD"'' /etc/sysconfig/network-scripts/ifcfg-"$NIC"
   fi
   if [ "$GATEWAY" = '' ]; then
     sed -i '$ a\GATEWAY='"$gateway"'' /etc/sysconfig/network-scripts/ifcfg-"$NIC"
@@ -551,6 +551,24 @@ config_ipadd() {
 install_nginx() {
   info "*** 安装 Nginx ***"
   # 安装nginx
+  yum install -y yum-utils
+  cat >/etc/yum.repos.d/nginx.repo <<EOF
+[nginx-stable]
+name=nginx stable repo
+baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true
+
+[nginx-mainline]
+name=nginx mainline repo
+baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+gpgcheck=1
+enabled=0
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true
+EOF
   yum install -y nginx
   systemctl enable nginx
   cont "Firewalld 防火墙放通 http & https 端口..."
