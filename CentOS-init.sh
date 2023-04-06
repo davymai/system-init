@@ -202,7 +202,6 @@ delete_useless_user() {
   userdel -r lp
   userdel -r games
   userdel -r ftp
-  groupdel adm
   groupdel lp
   groupdel games
   groupdel video
@@ -557,7 +556,7 @@ install_nginx() {
   cat >/etc/yum.repos.d/nginx.repo <<EOF
 [nginx-stable]
 name=nginx stable repo
-baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+baseurl=http://nginx.org/packages/centos/\$releasever/\$basearch/
 gpgcheck=1
 enabled=1
 gpgkey=https://nginx.org/keys/nginx_signing.key
@@ -565,7 +564,7 @@ module_hotfixes=true
 
 [nginx-mainline]
 name=nginx mainline repo
-baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+baseurl=http://nginx.org/packages/mainline/centos/\$releasever/\$basearch/
 gpgcheck=1
 enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
@@ -1070,7 +1069,8 @@ ${Blue}请牢记您的密码!!!
 sed -i '/^PasswordAuthentication no/s/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 systemctl restart sshd
 ${Blue}================================${Color_off}
-${Green}内网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$ipadd${Color_off}
+local_ipadd=$(ip addr | awk '/^[0-9]+: / {}; /inet.*global/ {print gensub(/(.*)\/(.*)/, "\\1", "g", $2)}')
+${Green}内网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$local_ipadd${Color_off}
 ${Green}互联网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$MYIP${Color_off}"
 # 清除历史记录
 cat /dev/null > ~/.bash_history && history -c
