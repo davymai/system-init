@@ -183,7 +183,7 @@ install_tools() {
   #yum install -y vim authconfig libselinux-utils initscripts net-tools
   # 安装 wget vim net-tools htop supervisor
   cont "正在安装 ${BYellow}wget vim zip unzip lrzsz net-tools htop supervisor${Color_off} ...\n"
-  yum install -y wget vim zip unzip lrzsz net-tools htop 
+  yum install -y wget vim zip unzip lrzsz net-tools htop socat
   # supervisor 进程管理
   #yum install -y supervisor
   #echo ''
