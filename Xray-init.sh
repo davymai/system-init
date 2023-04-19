@@ -476,6 +476,7 @@ net.ipv4.conf.all.rp_filter = 1
 # IP 转发, 默认关闭
 #net.ipv4.ip_forward=1
 EOF
+  /usr/sbin/sysctl -p
   success "sysctl 优化完成。\n"
 }
 
@@ -487,7 +488,6 @@ disable_ipv6() {
   sed -i '$a\NETWORKING_IPV6=no' /etc/sysconfig/network
   sed -i '/^#AddressFamily/s/#AddressFamily any/AddressFamily inet/g' /etc/ssh/sshd_config
   systemctl restart sshd
-  /usr/sbin/sysctl -p
   success "IPv6禁用完成。\n"
 }
 
@@ -554,24 +554,6 @@ config_ipadd() {
 install_nginx() {
   info "*** 安装 Nginx ***"
   # 安装nginx
-  yum install -y yum-utils
-  cat >/etc/yum.repos.d/nginx.repo <<EOF
-[nginx-stable]
-name=nginx stable repo
-baseurl=http://nginx.org/packages/centos/\$releasever/\$basearch/
-gpgcheck=1
-enabled=1
-gpgkey=https://nginx.org/keys/nginx_signing.key
-module_hotfixes=true
-
-[nginx-mainline]
-name=nginx mainline repo
-baseurl=http://nginx.org/packages/mainline/centos/\$releasever/\$basearch/
-gpgcheck=1
-enabled=0
-gpgkey=https://nginx.org/keys/nginx_signing.key
-module_hotfixes=true
-EOF
   yum install -y nginx
   systemctl enable nginx
   cont "Firewalld 防火墙放通 http & https 端口..."
