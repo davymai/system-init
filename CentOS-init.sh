@@ -9,6 +9,8 @@
 #
 #   Author: 大威(Davy) ( i[at]davymai.com )
 #
+#   Link: https://github.com/davymai/CentOS-init
+#
 #   Version: 2.90
 #################################################
 # 设置参数
@@ -130,7 +132,7 @@ system_update() {
   info "*** 更新系统 ***"
   # 云服务器注释设置开始
   # 备份 yum 源镜像文件 **本地服务器必须打开注释， 做好备份!**
-  cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
+  cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
   cont "更换 yum 源镜像为${BYellow}清华大学${Color_off}镜像..."
   sed -e 's|^mirrorlist=|#mirrorlist=|g' \
     -e 's|^#baseurl=http://mirror.centos.org|baseurl=https://mirrors.tuna.tsinghua.edu.cn|g' \
@@ -141,7 +143,7 @@ system_update() {
   #cont "更换 yum 源镜像为${BYellow}腾讯云${Color_off}镜像..."
   #curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.cloud.tencent.com/repo/centos7_base.repo
   #备份 epel 源镜像文件 **本地服务器必须打开注释， 做好备份!**
-  cp /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.backup-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null 2>&1
+  cp /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.backup.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null 2>&1
   cont "添加 ${BYellow}epel${Color_off} 源为${BYellow}清华大学${Color_off}镜像..."
   yum install -y epel-release
   sed -e 's!^metalink=!#metalink=!g' \
@@ -346,7 +348,7 @@ config_sshd() {
 # 配置 bashrc
 config_bashrc() {
   info "***配置 bashrc alias ***"
-  cp -f /etc/bashrc /etc/bashrc.bak-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
+  cp -f /etc/bashrc /etc/bashrc.bak.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
   #echo "export PS1='\[\033[37;1m\][\[\033[35;1m\]\u\[\033[0m\]@\[\033[34;1m\]\h \[\033[37;1m\]➜ \[\033[31;1m\]\w \[\033[33;1m\]\t\[\033[37;1m\]]\[\033[32;1m\]\[\]\\$ \[\033[m\]'" >>/etc/bashrc
   echo "if [ \$(whoami) = "root" ]; then
     export PS1='\[\033[37;1m\][\[\033[31;1m\]\u\[\033[0m\]@\[\033[34;1m\]\h \[\033[37;1m\]➜ \[\033[31;1m\]\w \[\033[33;1m\]\t\[\033[37;1m\]]\[\033[32;1m\]\[\]\\$ \[\033[m\]'
@@ -441,7 +443,7 @@ config_firewall() {
 # 配置sysctl
 config_sysctl() {
   info "*** 优化 sysctl 配置 ***"
-  cp -f /etc/sysctl.conf /etc/sysctl.conf.bak-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
+  cp -f /etc/sysctl.conf /etc/sysctl.conf.bak.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
   cat /dev/null >/etc/sysctl.conf
   cat >/etc/sysctl.conf <<EOF
 fs.file-max = 655350
@@ -480,7 +482,7 @@ EOF
 # 禁用IPv6
 disable_ipv6() {
   info "*** 禁用IPv6 ***"
-  cp /etc/sysctl.conf /etc/sysctl.conf.bak-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
+  cp /etc/sysctl.conf /etc/sysctl.conf.bak.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
   sed -i '$a\net.ipv6.conf.all.disable_ipv6 = 1\nnet.ipv6.conf.default.disable_ipv6 = 1\nnet.ipv6.conf.lo.disable_ipv6 = 1' /etc/sysctl.conf
   sed -i '$a\NETWORKING_IPV6=no' /etc/sysconfig/network
   sed -i '/^#AddressFamily/s/#AddressFamily any/AddressFamily inet/g' /etc/ssh/sshd_config
@@ -670,7 +672,7 @@ config_mongodb_port() {
   else
     error "没安装 MongoDB\n"
   fi
-  cp /etc/mongod.conf /etc/mongod.conf.bak-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
+  cp /etc/mongod.conf /etc/mongod.conf.bak.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
   # 修改mongodb端口
   cont "修改 MongoDB 端口..."
   while :; do
@@ -715,7 +717,7 @@ install_mysql8() {
   #安装报错在最后添加此参数 --nogpgcheck
   yum install -y mysql-community-server-8.0.31
   # 备份 mysql 配置
-  cp /etc/my.cnf /etc/my.cnf.bak-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
+  cp /etc/my.cnf /etc/my.cnf.bak.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
   # 关闭 mysql X plugin
   sed -i '$ a\mysqlx=0' /etc/my.cnf
   systemctl enable mysqld
@@ -737,7 +739,7 @@ config_mysql8_port_rootpasswd() {
     error "没安装 MySQL\n"
   fi
   # 修改mysql端口
-  cp /etc/my.cnf /etc/my.cnf.bak-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
+  cp /etc/my.cnf /etc/my.cnf.bak.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
   while :; do
     printf "请输入 Mysql 端口(留空默认: 3306): "
     read -r mysql_port
@@ -863,7 +865,7 @@ install_redis() {
   yum install -y https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm
   yum --enablerepo=remi install -y redis-5.0.14
   # 备份 redis 设置
-  cp /etc/redis.conf /etc/redis.conf.bak-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
+  cp /etc/redis.conf /etc/redis.conf.bak.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
   # 开启 redis 外网连接
   sed -i 's/bind 127.0.0.1/bind 0.0.0.0/g' /etc/redis.conf
   systemctl enable redis
@@ -878,7 +880,7 @@ install_redis() {
 config_redis_port() {
   info "*** 设置 Redis 访问端口 ***"
   if [ -s /var/lib/redis ]; then
-    cp /etc/redis.conf /etc/redis.conf.bak-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
+    cp /etc/redis.conf /etc/redis.conf.bak.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
     #DB_Version=$(mysql --version)
   else
     error "没安装 Redis\n"
@@ -910,7 +912,7 @@ config_redis_port() {
 config_redis_password() {
   info "*** 设置 Redis 访问密码 ***"
   if [ -s /var/lib/redis ]; then
-    cp /etc/redis.conf /etc/redis.conf.bak-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
+    cp /etc/redis.conf /etc/redis.conf.bak.$(date +%F)-$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
     #DB_Version=$(mysql --version)
   else
     error "没安装 Redis\n"
