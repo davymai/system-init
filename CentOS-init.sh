@@ -551,9 +551,9 @@ config_ipadd() {
   success "IP地址设置完成。\n"
 }
 
+# 安装nginx
 install_nginx() {
   info "*** 安装 Nginx ***"
-  # 安装nginx
   yum install -y yum-utils
   cat >/etc/yum.repos.d/nginx.repo <<EOF
 [nginx-stable]

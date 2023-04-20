@@ -560,9 +560,26 @@ config_ipadd() {
   success "IP地址设置完成。\n"
 }
 
+# 安装nginx
 install_nginx() {
   info "*** 安装 Nginx ***"
-  # 安装nginx
+  cat >/etc/yum.repos.d/nginx.repo <<EOF
+[nginx-stable]
+name=nginx stable repo
+baseurl=http://nginx.org/packages/centos/\$releasever/\$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true
+
+[nginx-mainline]
+name=nginx mainline repo
+baseurl=http://nginx.org/packages/mainline/centos/\$releasever/\$basearch/
+gpgcheck=1
+enabled=0
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true
+EOF
   yum install -y nginx
   systemctl enable nginx
   cont "Firewalld 防火墙放通 http & https 端口..."
