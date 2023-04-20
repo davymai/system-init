@@ -159,6 +159,13 @@ system_update() {
   cont "开始更新系统..."
   yum makecache fast && yum update -y && yum -y upgrade
   success "系统更新完成。\n"
+  # 升级内核以开启BBR加速
+  cont "开始升级系统内核..."
+  rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+  rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+  yum --enablerepo=elrepo-kernel install kernel-ml -y
+  grub2-set-default 0
+  success "系统内核升级完成。\n"
 }
 
 # 安装软件工具包
@@ -472,6 +479,9 @@ net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60
 net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 120
 # 开启反向路径过滤(增强网络安全)
 net.ipv4.conf.all.rp_filter = 1
+# 开启BBR
+net.core.default_qdisc=fq
+net.ipv4.tcp_congestion_control=bbr
 # IP 转发, 默认关闭
 #net.ipv4.ip_forward=1
 EOF
