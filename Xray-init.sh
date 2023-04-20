@@ -683,7 +683,7 @@ ${Blue}请牢记您的密码!!!
 *** 系统默认${Red}禁止${Blue}密码登陆, 需要密码登陆请使用以下命令设置: ${White}
 sed -i '/^PasswordAuthentication no/s/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 systemctl restart sshd
-*** 系统默认${Red}禁止 ${BYellow}root用户 ${Blue}登陆, 需要root用户登陆请使用以下命令设置: ${White}
+*** 系统默认${Red}禁止 ${BYellow}root ${Blue}用户登陆, 需要root用户登陆请使用以下命令设置: ${White}
 sed -i 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config
 ${Blue}================================${Color_off}
 ${Green}内网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$local_ipadd${Color_off}
