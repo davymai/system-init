@@ -334,8 +334,8 @@ config_sshd() {
   sed -i 's/UsePAM.*/UsePAM yes/g' /etc/ssh/sshd_config
   sed -i '/^GSSAPIAuthentication/s/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
   sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/g' /etc/ssh/sshd_config
-  # 如果不想让root登录，请在下面打开注释
-  #sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
+  # 如果想让root登录，请在下面打开注释
+  sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
 
   if ! systemctl restart sshd; then
     error "sshd 重启失败, 请检查配置。\n"
@@ -656,6 +656,8 @@ ${Blue}请牢记您的密码!!!
 *** 系统默认${Red}禁止${Blue}密码登陆, 需要密码登陆请使用以下命令设置: ${White}
 sed -i '/^PasswordAuthentication no/s/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 systemctl restart sshd
+*** 系统默认${Red}禁止 ${BYellow}root用户 ${Blue}登陆, 需要root用户登陆请使用以下命令设置: ${White}
+sed -i 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config
 ${Blue}================================${Color_off}
 ${Green}内网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$local_ipadd${Color_off}
 ${Green}互联网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$MYIP${Color_off}"
