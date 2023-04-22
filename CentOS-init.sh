@@ -476,6 +476,7 @@ net.ipv4.conf.all.rp_filter = 1
 # IP 转发, 默认关闭
 #net.ipv4.ip_forward=1
 EOF
+  /usr/sbin/sysctl -p
   success "sysctl 优化完成。\n"
 }
 
