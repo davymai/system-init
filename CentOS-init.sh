@@ -223,6 +223,19 @@ disable_services() {
   success "完成精简开机启动\n"
 }
 
+# 禁用 selinux
+disable_selinux() {
+  info "*** 禁用 selinux ***"
+  SELINUX=$(grep -c SELINUX=disabled /etc/selinux/config)
+  if [ "$SELINUX" -eq 1 ]; then
+    success "selinux 已禁用"
+  else
+    setenforce 0
+    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+    success "禁用 selinux 完成。\n"
+  fi
+}
+
 # 密码规则配置
 config_password() {
   info "*** 设置密码规则，提升安全性 ***"
@@ -409,19 +422,6 @@ config_ulimit() {
 EOF
   ulimit -n 102400
   success "Ulimit 配置完成。\n"
-}
-
-# 禁用 selinux
-config_selinux() {
-  info "*** 禁用 selinux ***"
-  SELINUX=$(grep -c SELINUX=disabled /etc/selinux/config)
-  if [ "$SELINUX" -eq 1 ]; then
-    success "selinux 已禁用"
-  else
-    setenforce 0
-    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-    success "禁用 selinux 完成。\n"
-  fi
 }
 
 # 配置 firewall
@@ -1012,6 +1012,7 @@ main() {
   install_tools
   delete_useless_user
   disable_services
+  disable_selinux
   root_sshkey
   create_user
   config_sshd
@@ -1021,20 +1022,19 @@ main() {
   disable_ipv6
   #config_ipadd
   config_ulimit
-  config_selinux
   config_firewall
   config_sysctl
-  install_nginx
-  #install_golang
+  #install_nginx
   #install_git
-  #install_mongodb
-  #config_mongodb_port
-  #install_mysql8
-  #config_mysql8_port_rootpasswd
-  #create_mysql_user
-  #install_redis
-  #config_redis_port
-  #config_redis_password
+  install_golang
+  install_mongodb
+  config_mongodb_port
+  install_mysql8
+  config_mysql8_port_rootpasswd
+  create_mysql_user
+  install_redis
+  config_redis_port
+  config_redis_password
   #config_minifire_lobby
   other
 }
