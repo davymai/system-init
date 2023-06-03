@@ -453,6 +453,8 @@ vm.dirty_ratio = 20
 # overcommit_memory 内存机制
 vm.overcommit_memory=1
 vm.dirty_background_ratio = 5
+# 调整进程最大虚拟内存区域数量
+vm.max_map_count=262144
 # 开启重用。允许将TIME-WAIT sockets 重新用于新的TCP 连接
 net.ipv4.tcp_fin_timeout = 30
 net.ipv4.tcp_tw_reuse = 1
@@ -463,7 +465,7 @@ net.ipv4.tcp_syncookies = 1
 net.ipv4.tcp_keepalive_time = 600
 # timewait的数量, 默认18000
 net.ipv4.tcp_max_tw_buckets = 36000
-net.core.somaxconn = 262144
+net.core.somaxconn = 65535
 net.core.netdev_max_backlog = 262144
 net.ipv4.tcp_max_orphans = 262144
 net.netfilter.nf_conntrack_max = 25000000
