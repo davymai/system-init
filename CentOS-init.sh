@@ -217,9 +217,10 @@ disable_services() {
   cont "正在禁用 ${BRed}postfix${Color_off} 服务..."
   systemctl disable auditd.service
   systemctl disable postfix.service
+  systemctl disable NetworkManager
   systemctl disable dbus-org.freedesktop.NetworkManager.service
   echo '#systemctl list-unit-files | grep -E "auditd|postfix|dbus-org\.freedesktop\.NetworkManager"'
- systemctl list-unit-files | grep -E "auditd|postfix|dbus-org\.freedesktop\.NetworkManager"
+  systemctl list-unit-files | grep -E "auditd|postfix|NetworkManager|dbus-org\.freedesktop\.NetworkManager"
   success "完成精简开机启动\n"
 }
 
