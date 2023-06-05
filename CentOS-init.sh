@@ -1028,15 +1028,15 @@ main() {
   config_sysctl
   #install_nginx
   #install_git
-  install_golang
-  install_mongodb
-  config_mongodb_port
-  install_mysql8
-  config_mysql8_port_rootpasswd
-  create_mysql_user
-  install_redis
-  config_redis_port
-  config_redis_password
+  #install_golang
+  #install_mongodb
+  #config_mongodb_port
+  #install_mysql8
+  #config_mysql8_port_rootpasswd
+  #create_mysql_user
+  #install_redis
+  #config_redis_port
+  #config_redis_password
   #config_minifire_lobby
   other
 }
