@@ -352,7 +352,7 @@ config_sshd() {
   sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
 
   if ! systemctl restart sshd; then
-    error "sshd 重启失败, 请检查配置。\n" 
+    error "sshd 重启失败, 请检查配置。\n"
   else
     success "SSH 端口设置完成。\n"
   fi
