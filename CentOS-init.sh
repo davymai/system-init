@@ -1116,5 +1116,3 @@ done
 if [ "$is_reboot" = 'y' ]; then
   reboot
 fi
-
-#大厅:守护进程+配置-数数正式，放通9000-10000端口
