@@ -392,9 +392,10 @@ config_timezone() {
   if ! timedatectl | grep "Asia/Shanghai"; then
     timedatectl set-local-rtc 0 && timedatectl set-timezone Asia/Shanghai
   else
-    cont "系统当前时区为 Asia/Shanghai ..."
+    cont "系统当前时区为 Asia/Shanghai..."
   fi
   #同步时间
+  cont "设置 时间同步..."
   yum -y install ntpdate
   ntpdate -u cn.ntp.org.cn
   # 设置定时同步
