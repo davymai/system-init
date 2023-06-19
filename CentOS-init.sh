@@ -1039,6 +1039,7 @@ main() {
   #install_redis
   #config_redis_port
   #config_redis_password
+  #install_shushu_logbus
   #config_minifire_lobby
   other
 }
