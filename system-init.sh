@@ -14,7 +14,7 @@
 #   Version: 0.2.9
 #################################################
 # 设置参数
-if [ "$(cat /etc/system-release | awk '{print $1}')" != "Rocky" ]; then
+if [ "$(cat /etc/system-release | awk '{print $1}')" == "CentOS" ]; then
   . /etc/rc.d/init.d/functions
 fi
 echo "export LC_ALL=en_US.UTF8" >>/etc/profile
@@ -52,6 +52,7 @@ INFO=$(cat /etc/system-release)
 net_ip=$(curl -s ip.sb)
 ipadd=$(ip addr | awk '/^[0-9]+: / {}; /inet.*global/ {print gensub(/(.*)\/(.*)/, "\\1", "g", $2)}')
 ShellFolder=$(cd "$(dirname -- "$0")" || exit pwd)
+system_name=$(cat /etc/system-release | awk '{print $1}')
 
 # 成功/信息/错误/警告 文字颜色设置 {{{
 msg() {
@@ -136,7 +137,7 @@ system_update() {
   # 云服务器注释设置开始
   # 备份 yum 源镜像文件 **本地服务器必须打开注释， 做好备份!**
   cont "更换 ${BGreen}yum${Color_off} 源镜像为${BYellow}清华大学${Color_off}镜像..."
-  if [ "$(cat /etc/system-release | awk '{print $1}')" != "Rocky" ]; then
+  if [ "$system_name" == "CentOS" ]; then
     cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
     sed -e 's|^mirrorlist=|#mirrorlist=|g' \
       -e 's|^#baseurl=http://mirror.centos.org|baseurl=https://mirrors.tuna.tsinghua.edu.cn|g' \
@@ -146,7 +147,7 @@ system_update() {
     #curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
     #cont "更换 yum 源镜像为${BYellow}腾讯云${Color_off}镜像..."
     #curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.cloud.tencent.com/repo/centos7_base.repo
-    if [ "$(grep -c "baseurl=https://mirrors.ustc.edu.cn" /etc/yum.repos.d/CentOS-Base.repo)" -ne '0' ]; then
+    if [ "$(grep -c "baseurl=https://mirrors.tuna.tsinghua.edu.cn" /etc/yum.repos.d/CentOS-Base.repo)" -ne '0' ]; then
       success "更换 ${BYellow}清华大学${Color_off} yum 源完成。\n"
     else
       warn "更换 ${BYellow}清华大学${Color_off} yum 源失败。\n"
@@ -169,7 +170,7 @@ system_update() {
   cont "添加 ${BGreen}epel${Color_off} 源为${BYellow}清华大学${Color_off}镜像..."
   yum install -y epel-release
   #备份 epel 源镜像文件 **本地服务器必须打开注释， 做好备份!**
-  if [ "$(cat /etc/system-release | awk '{print $1}')" != "Rocky" ]; then
+  if [ "$system_name" == "CentOS" ]; then
     cp /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.backup.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null 2>&1
     sed -e 's!^metalink=!#metalink=!g' \
       -e 's!^#baseurl=!baseurl=!g' \
@@ -200,7 +201,7 @@ system_update() {
     warn "添加 ${BYellow}清华大学${Color_off} epel 源失败。\n"
   fi
   cont "开始更新升级系统..."
-  if [ "$(cat /etc/system-release | awk '{print $1}')" != "Rocky" ]; then
+  if [ "$system_name" == "CentOS" ]; then
     yum makecache fast && yum update -y && yum -y upgrade
   else
     dnf makecache && yum update -y && yum -y upgrade
@@ -225,23 +226,20 @@ install_tools() {
   info "*** 安装工具包 ***"
   # LSB 标准化，提升兼容性
   cont "正在安装 ${BYellow}LSB${Color_off} 提升兼容性..."
-  command -v lsb_release >/dev/null 2>&1 || {
-    #CentOS
-    if [ ! -f "/bin/lsb_release" ] && [ "$(cat /etc/system-release | awk '{print $1}')" != "CentOS" ]; then
-      yumInstall "redhat-lsb-core"
-    else
-      warn "${BYellow}LSB${Color_off} 已经存在，无需安装。\n"
-    fi
-    #Rocky
-    if [ ! -f "/usr/bin/lsb_release" ] && [ "$(cat /etc/system-release | awk '{print $1}')" != "Rocky" ]; then
-      yum config-manager --set-enabled devel
-      yum update -y
-      yumInstall "redhat-lsb-core"
-    else
-      warn "${BYellow}LSB${Color_off} 已经存在，无需安装。\n"
-    fi
-    #华为OS "euleros-lsb"
-  }
+  #CentOS
+  if [ -f "/usr/bin/lsb_release" ] && [ "$system_name" == "CentOS" ]; then
+    warn "${BYellow}LSB${Color_off} 已经存在，无需安装。\n"
+  elif [ ! -f "/usr/bin/lsb_release" ] && [ "$system_name" == "CentOS" ]; then
+    yumInstall "redhat-lsb-core"
+  #Rocky
+  elif [ -f "/usr/bin/lsb_release" ] && [ "$system_name" == "Rocky" ]; then
+    warn "${BYellow}LSB${Color_off} 已经存在，无需安装。\n"
+  else
+    yum config-manager --set-enabled devel
+    yumInstall "redhat-lsb-core"
+  fi
+  #华为OS "euleros-lsb"
+
   # 安装 gcc
   #cont "正在安装 ${BYellow}gcc${Color_off} ..."
   #command -v gcc >/dev/null 2>&1 || yum -y install gcc
@@ -290,7 +288,7 @@ delete_useless_user() {
 # 禁用不使用服务
 disable_services() {
   info "*** 精简开机启动 ***"
-  if [ "$(cat /etc/system-release | awk '{print $1}')" != "Rocky" ]; then
+  if [ "$system_name" != "Rocky" ]; then
     cont "正在禁用 ${BRed}auditd${Color_off} 服务..."
     systemctl disable auditd.service
     cont "正在禁用 ${BRed}postfix${Color_off} 服务..."
@@ -436,8 +434,11 @@ config_sshd() {
   sed -i '/^GSSAPIAuthentication/s/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
   sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/g' /etc/ssh/sshd_config
   # 禁止root用户登录
-  sed -i '/^PermitRootLogin yes/s/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
-
+  if [ "$system_name" == "CentOS" ]; then
+    sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
+  else
+    sed -i '/^PermitRootLogin yes/s/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
+  fi
   if ! systemctl restart sshd; then
     error "sshd 重启失败, 请检查配置。\n"
   else
@@ -1106,7 +1107,7 @@ main() {
   create_user
   config_sshd
   config_bashrc
-  config_vi
+  config_vim
   config_timezone
   disable_ipv6
   #config_ipadd
@@ -1162,9 +1163,13 @@ ${BBlue}请牢记您的密码!!!
 ${Blue}*** 系统默认${Red}禁止${Blue}密码登陆, 需要密码登陆请使用以下命令设置: ${White}
 sed -i '/^PasswordAuthentication no/s/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 systemctl restart sshd
-${Blue}*** 系统默认${Red}禁止 ${BYellow}root ${Blue}用户登陆, 需要root用户登陆请使用以下命令设置: ${White}
-sed -i '/^PermitRootLogin no/s/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config
-${Blue}================================${Color_off}
+${Blue}*** 系统默认${Red}禁止 ${BYellow}root ${Blue}用户登陆, 需要root用户登陆请使用以下命令设置: ${White}"
+if [ "$system_name" == "CentOS" ]; then
+msg "sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"
+else
+msg "sed -i '/^PermitRootLogin no/s/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"
+fi
+msg "${Blue}================================${Color_off}
 ${Green}内网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$local_ipadd${Color_off}
 ${Green}互联网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$net_ip${Color_off}"
 # 判断 nginx 是否存在
