@@ -85,7 +85,7 @@ welcome() {
   |                       初始化系统以确保安全性和性能                     |
   +------------------------------------------------------------------------+
         System: ${INFO%\\l}    Version: ${VERSION}    
-        updated date: 2023-04-03                         by: 大威(Davy)
+        updated date: 2023-10-12                         by: 大威(Davy)
 
                      初始化脚本 ${BRed}5 ${Cyan}秒后开始, 按 ${BGreen}ctrl C ${Cyan}取消
 ${Color_off}"
