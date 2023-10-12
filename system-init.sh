@@ -396,7 +396,7 @@ create_user() {
   # 为 root 添加用户公钥
   cont "为 root 添加用户公钥..."
   if test -s /root/.ssh/authorized_keys; then
-    sed -i '$a/'"$user_rsa"'' /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
+    sed -i '$a'"$user_rsa"'' /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
   else
     echo "$user_rsa" >>/root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
   fi
@@ -422,19 +422,7 @@ config_sshd() {
     elif [ "${ssh_port}" -gt "65535" ]; then
       warn "端口号不能超过 ${Red}65535${Color_off}, 请重新输入!\n"
     else
-      break
-    fi
-  done
-  sed -i '/^#Port/s/#Port 22/Port '"$ssh_port"'/g' /etc/ssh/sshd_config
-  sed -i '/^#UseDNS/s/#UseDNS yes/UseDNS no/g' /etc/ssh/sshd_config
-  # 禁用密码登陆
-  if [ "$system_name" == "CentOS" ]; then
-  sed -i '/^PasswordAuthentication yes/s/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
-  else
-  sed -i '/^#PasswordAuthentication yes/s/#PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
-  fi
-  sed -i '/^#PubkeyAuthentication/s/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
-  sed -i 's/UsePAM.*/UsePAM yes/g' /etc/ssh/sshd_config
+      breakdsshd_config
   sed -i '/^GSSAPIAuthentication/s/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
   sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/g' /etc/ssh/sshd_config
   # 禁止root用户登录
