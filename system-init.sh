@@ -428,7 +428,11 @@ config_sshd() {
   sed -i '/^#Port/s/#Port 22/Port '"$ssh_port"'/g' /etc/ssh/sshd_config
   sed -i '/^#UseDNS/s/#UseDNS yes/UseDNS no/g' /etc/ssh/sshd_config
   # 禁用密码登陆
+  if [ "$system_name" == "CentOS" ]; then
   sed -i '/^PasswordAuthentication yes/s/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
+  else
+  sed -i '/^#PasswordAuthentication yes/s/#PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
+  fi
   sed -i '/^#PubkeyAuthentication/s/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
   sed -i 's/UsePAM.*/UsePAM yes/g' /etc/ssh/sshd_config
   sed -i '/^GSSAPIAuthentication/s/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
@@ -437,7 +441,7 @@ config_sshd() {
   if [ "$system_name" == "CentOS" ]; then
     sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
   else
-    sed -i '/^PermitRootLogin yes/s/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/g' /etc/ssh/sshd_config
   fi
   if ! systemctl restart sshd; then
     error "sshd 重启失败, 请检查配置。\n"
