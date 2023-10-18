@@ -1,7 +1,7 @@
 #!/bin/sh
 #################################################
 #  --Info
-#      Initialization Rocky Linux 9.x & CentOS 7.x script
+#      Initialization Rocky Linux 8.x-9.x & CentOS 7.x script
 #################################################
 #   File: system-init.sh
 #
@@ -82,7 +82,7 @@ welcome() {
   clear
   msg "${Cyan}
   +------------------------------------------------------------------------+
-  |                  Rocky Linux 9.x & CentOS 7.x 初始化脚本               |
+  |                Rocky Linux 8.x-9.x & CentOS 7.x 初始化脚本             |
   |                       初始化系统以确保安全性和性能                     |
   +------------------------------------------------------------------------+
         System: ${INFO%\\l}    Version: ${VERSION}    
@@ -422,7 +422,9 @@ config_sshd() {
     elif [ "${ssh_port}" -gt "65535" ]; then
       warn "端口号不能超过 ${Red}65535${Color_off}, 请重新输入!\n"
     else
-      breakdsshd_config
+      break
+    fi
+  done
   sed -i '/^GSSAPIAuthentication/s/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
   sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/g' /etc/ssh/sshd_config
   # 禁止root用户登录
@@ -1157,9 +1159,9 @@ sed -i '/^PasswordAuthentication no/s/PasswordAuthentication no/PasswordAuthenti
 systemctl restart sshd
 ${Blue}*** 系统默认${Red}禁止 ${BYellow}root ${Blue}用户登陆, 需要root用户登陆请使用以下命令设置: ${White}"
 if [ "$system_name" == "CentOS" ]; then
-msg "sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"
+  msg "sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"
 else
-msg "sed -i '/^PermitRootLogin no/s/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"
+  msg "sed -i '/^PermitRootLogin no/s/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"
 fi
 msg "${Blue}================================${Color_off}
 ${Green}内网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$local_ipadd${Color_off}
