@@ -152,7 +152,8 @@ system_update() {
     else
       warn "更换 ${BYellow}清华大学${Color_off} yum 源失败。\n"
     fi
-  else
+  fi
+  if [ "$system_name" == "Rocky" ]; then
     cp /etc/yum.repos.d/rocky.repo /etc/yum.repos.d/rocky.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
     cp /etc/yum.repos.d/rocky-extras.repo /etc/yum.repos.d/rocky-extras.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
     sed -e 's|^mirrorlist=|#mirrorlist=|g' \
