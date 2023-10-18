@@ -138,8 +138,9 @@ system_update() {
   # 云服务器注释设置开始
   # 备份 yum 源镜像文件 **本地服务器必须打开注释， 做好备份!**
   cont "更换 ${BGreen}yum${Color_off} 源镜像为${BYellow}清华大学${Color_off}镜像..."
+  mkdir -p /etc/yum.repos.d/backup
   if [ "$system_name" == "CentOS" ]; then
-    cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
+    cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/backup/CentOS-Base.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
     sed -e 's|^mirrorlist=|#mirrorlist=|g' \
       -e 's|^#baseurl=http://mirror.centos.org|baseurl=https://mirrors.tuna.tsinghua.edu.cn|g' \
       -i.bak \
@@ -155,8 +156,8 @@ system_update() {
     fi
   fi
   if [ "$system_name" == "Rocky" ] && [ "$system_version" == "9" ]; then
-    cp /etc/yum.repos.d/rocky.repo /etc/yum.repos.d/rocky.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
-    cp /etc/yum.repos.d/rocky-extras.repo /etc/yum.repos.d/rocky-extras.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
+    cp /etc/yum.repos.d/rocky.repo /etc/yum.repos.d/backup/rocky.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
+    cp /etc/yum.repos.d/rocky-extras.repo /etc/yum.repos.d/backup/rocky-extras.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
     sed -e 's|^mirrorlist=|#mirrorlist=|g' \
       -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.ustc.edu.cn/rocky|g' \
       -i.bak \
@@ -168,8 +169,8 @@ system_update() {
       warn "更换 ${BYellow}清华大学${Color_off} yum 源失败。\n"
     fi
   else
-    cp /etc/yum.repos.d/Rocky-BaseOS.repo /etc/yum.repos.d/Rocky-BaseOS.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
-    cp /etc/yum.repos.d/Rocky-Extras.repo /etc/yum.repos.d/Rocky-Extras.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
+    cp /etc/yum.repos.d/Rocky-BaseOS.repo /etc/yum.repos.d/backup/Rocky-BaseOS.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
+    cp /etc/yum.repos.d/Rocky-Extras.repo /etc/yum.repos.d/backup/Rocky-Extras.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
     sed -e 's|^mirrorlist=|#mirrorlist=|g' \
       -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.ustc.edu.cn/rocky|g' \
       -i.bak \
