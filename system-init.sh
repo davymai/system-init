@@ -90,7 +90,7 @@ welcome() {
 
                      初始化脚本 ${BRed}5 ${Cyan}秒后开始, 按 ${BGreen}ctrl C ${Cyan}取消
 ${Color_off}"
-  sleep 6
+  sleep 5
 }
 
 # 检查用户是否为 root
@@ -425,8 +425,14 @@ config_sshd() {
       break
     fi
   done
+  # 修改ssh端口
+  sed -i '/^#Port/s/#Port 22/Port '"$ssh_port"'/g' /etc/ssh/sshd_config
+  sed -i '/^#PubkeyAuthentication/s/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
+  sed -i '/^#UseDNS/s/#UseDNS yes/UseDNS no/g' /etc/ssh/sshd_config
   sed -i '/^GSSAPIAuthentication/s/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
   sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/g' /etc/ssh/sshd_config
+  # 禁用密码登陆
+  sed -i '/^PasswordAuthentication yes/s/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
   # 禁止root用户登录
   if [ "$system_name" == "CentOS" ]; then
     sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
@@ -476,12 +482,18 @@ config_timezone() {
   fi
   #同步时间
   cont "设置 时间同步..."
-  yum -y install ntpdate
-  ntpdate -u cn.ntp.org.cn
-  # 设置定时同步
-  cont "每 ${BCyan}20${Color_off} 分钟进行一次时间同步..."
-  echo "*/20 * * * * root /usr/sbin/ntpdate cn.ntp.org.cn" >>/etc/crontab
-  systemctl reload crond
+  if [ "$system_name" == "CentOS" ]; then
+    yum -y install ntpdate
+    ntpdate -u cn.ntp.org.cn
+    # 设置定时同步
+    cont "每 ${BCyan}20${Color_off} 分钟进行一次时间同步..."
+    echo "*/20 * * * * root /usr/sbin/ntpdate cn.ntp.org.cn" >>/etc/crontab
+    systemctl reload crond
+  else
+    dnf install -y systemd-timesyncd
+    systemctl enable systemd-timesyncd
+    systemctl start systemd-timesyncd
+  fi
   #yum -y install chrony
   #sed -i '/server 3.centos.pool.ntp.org iburst/a\\server ntp1.aliyun.com iburst\nserver ntp2.aliyun.com iburst\nserver ntp3.aliyun.com iburst\nserver ntp4.aliyun.com iburst\nserver ntp5.aliyun.com iburst\nserver ntp6.aliyun.com iburst\nserver ntp7.aliyun.com iburst' /etc/chrony.conf
   #systemctl enable chronyd.service && systemctl start chronyd.service
@@ -728,24 +740,39 @@ install_git() {
 
 install_mongodb() {
   info "*** 安装 MongoDB 4 数据库 ***"
-  cont "添加 MongoDB ${BYellow}清华大学${Color_off} 源镜像..."
-  cat >/etc/yum.repos.d/mongodb.repo <<EOF
+  if [ "$system_name" == "CentOS" ]; then
+    cont "添加 MongoDB ${BYellow}清华大学${Color_off} 源镜像..."
+    cat >/etc/yum.repos.d/mongodb.repo <<EOF
 [mongodb-org]
 name=MongoDB Repository
 baseurl=https://mirrors.tuna.tsinghua.edu.cn/mongodb/yum/el7$releasever7-4.2/
 gpgcheck=0
 enabled=1
 EOF
-  yum makecache fast
-  yum -y install mongodb-org
-  cont "锁定 MongoDB 4 版本，不跟随 yum 升级..."
-  sed -i '$ a\exclude=mongodb-org,mongodb-org-server,mongodb-org-shell,mongodb-org-mongos,mongodb-org-tools' /etc/yum.conf
+    yum makecache fast
+    yum -y install mongodb-org
+  fi
+  if [ "$system_name" == "Rocky" ]; then
+    releasever=$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release) | grep -o '^[^.]\+')
+    cat >/etc/yum.repos.d/mongodb.repo <<EOF
+[mongodb-org-4.4]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.4/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
+EOF
+    yum makecache
+    yum install -y mongodb-org
+  fi
   systemctl enable mongod
   if ! systemctl start mongod; then
     error "mongodb 4 启动失败, 请检查配置!\n"
   else
     success "mongodb 4 安装完成。\n"
   fi
+  cont "锁定 MongoDB 4 版本，不跟随 yum 升级..."
+  sed -i '$ a\exclude=mongodb-org,mongodb-org-server,mongodb-org-shell,mongodb-org-mongos,mongodb-org-tools' /etc/yum.conf
   mongodb_version=$(mongo --version | grep "version" | cut -f3 -d "v" | awk 'NR==1 {print $1}')
 }
 
@@ -793,14 +820,26 @@ config_mongodb_port() {
 
 install_mysql8() {
   info "*** 安装 MySQL 8 数据库 ***"
+  cont "添加 ${BYellow}MySQL Community${Color_off} 源镜像..."
   # 下载mysql80的rpm仓库源
-  cont "添加 MySQL ${BYellow}清华大学${Color_off} 源镜像..."
-  yum install -y http://repo.mysql.com/mysql-community-release-el7.rpm
-  rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
-  # 更新MySQL公钥
-  yum makecache fast
-  #安装报错在最后添加此参数 --nogpgcheck
-  yum install -y mysql-community-server-8.0.31
+  if [ "$system_name" == "CentOS" ]; then
+    yum install -y http://repo.mysql.com/mysql-community-release-el7.rpm
+    # 更新MySQL公钥
+    rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+    yum makecache fast
+    #安装报错在最后添加此参数 --nogpgcheck
+    yum install -y mysql-community-server-8.0.31
+  fi
+  if [ "$system_name" == "Rocky" ]; then
+    releasever=$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release) | grep -o '^[^.]\+')
+    # 下载mysql80的rpm仓库源
+    yum install -y http://repo.mysql.com/mysql80-community-release-el$releasever.rpm
+    # 更新MySQL公钥
+    rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+    yum makecache
+    yum module disable -y mysql
+    yum install -y mysql-community-server-8.0.31
+  fi
   # 备份 mysql 配置
   cp /etc/my.cnf /etc/my.cnf.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
   # 关闭 mysql X plugin
@@ -947,8 +986,15 @@ create_mysql_user() {
 install_redis() {
   info "*** 安装 Redis ***"
   cont "添加 remi ${BYellow}清华大学${Color_off} 源镜像..."
-  yum install -y https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm
-  yum --enablerepo=remi install -y redis-5.0.14
+  if [ "$system_name" == "CentOS" ]; then
+    yum install -y https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm
+    yum --enablerepo=remi install -y redis-5.0.14
+  fi
+  if [ "$system_name" == "Rocky" ]; then
+    releasever=$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release) | grep -o '^[^.]\+')
+    yum install -y https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-$releasever.rpm
+    yum --enablerepo=remi install -y redis-5.0.14
+  fi
   # 备份 redis 设置
   cp /etc/redis.conf /etc/redis.conf.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
   # 开启 redis 外网连接
@@ -1092,22 +1138,22 @@ other() {
 main() {
   welcome
   #config_nameserver
-  system_update
-  install_tools
-  delete_useless_user
-  disable_services
-  disable_selinux
-  root_sshkey
-  create_user
-  config_sshd
-  config_bashrc
-  config_vim
-  config_timezone
-  disable_ipv6
+  #system_update
+  #install_tools
+  #delete_useless_user
+  #disable_services
+  #disable_selinux
+  #root_sshkey
+  #create_user
+  #config_sshd
+  #config_bashrc
+  #config_vim
+  #config_timezone
+  #disable_ipv6
   #config_ipadd
-  config_ulimit
-  config_firewall
-  config_sysctl
+  #config_ulimit
+  #config_firewall
+  #config_sysctl
   #install_nginx
   #install_git
   #install_golang
@@ -1116,9 +1162,9 @@ main() {
   #install_mysql8
   #config_mysql8_port_rootpasswd
   #create_mysql_user
-  #install_redis
-  #config_redis_port
-  #config_redis_password
+  install_redis
+  config_redis_port
+  config_redis_password
   #install_shushu_logbus
   #config_minifire_lobby
   other
