@@ -53,6 +53,7 @@ net_ip=$(curl -s ip.sb)
 ipadd=$(ip addr | awk '/^[0-9]+: / {}; /inet.*global/ {print gensub(/(.*)\/(.*)/, "\\1", "g", $2)}')
 ShellFolder=$(cd "$(dirname -- "$0")" || exit pwd)
 system_name=$(cat /etc/system-release | awk '{print $1}')
+system_version=$(cat /etc/system-release | awk '{print $4}' | grep -o '^[^.]\+')
 
 # 成功/信息/错误/警告 文字颜色设置 {{{
 msg() {
@@ -153,7 +154,7 @@ system_update() {
       warn "更换 ${BYellow}清华大学${Color_off} yum 源失败。\n"
     fi
   fi
-  if [ "$system_name" == "Rocky" ]; then
+  if [ "$system_name" == "Rocky" ] && [ "$system_version" == "9" ]; then
     cp /etc/yum.repos.d/rocky.repo /etc/yum.repos.d/rocky.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
     cp /etc/yum.repos.d/rocky-extras.repo /etc/yum.repos.d/rocky-extras.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
     sed -e 's|^mirrorlist=|#mirrorlist=|g' \
@@ -162,6 +163,19 @@ system_update() {
       /etc/yum.repos.d/rocky-extras.repo \
       /etc/yum.repos.d/rocky.repo
     if [ "$(grep -c "baseurl=https://mirrors.ustc.edu.cn" /etc/yum.repos.d/rocky.repo)" -ne '0' ]; then
+      success "更换 ${BYellow}清华大学${Color_off} yum 源完成。\n"
+    else
+      warn "更换 ${BYellow}清华大学${Color_off} yum 源失败。\n"
+    fi
+  else
+    cp /etc/yum.repos.d/Rocky-BaseOS.repo /etc/yum.repos.d/Rocky-BaseOS.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
+    cp /etc/yum.repos.d/Rocky-Extras.repo /etc/yum.repos.d/Rocky-Extras.repo.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null) >/dev/null >/dev/null 2>&1
+    sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+      -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.ustc.edu.cn/rocky|g' \
+      -i.bak \
+      /etc/yum.repos.d/Rocky-Extras.repo \
+      /etc/yum.repos.d/Rocky-BaseOS.repo
+    if [ "$(grep -c "baseurl=https://mirrors.ustc.edu.cn" /etc/yum.repos.d/Rocky-BaseOS.repo)" -ne '0' ]; then
       success "更换 ${BYellow}清华大学${Color_off} yum 源完成。\n"
     else
       warn "更换 ${BYellow}清华大学${Color_off} yum 源失败。\n"
