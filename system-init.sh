@@ -993,7 +993,7 @@ install_redis() {
   if [ "$system_name" == "Rocky" ]; then
     releasever=$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release) | grep -o '^[^.]\+')
     yum install -y https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-$releasever.rpm
-    yum --enablerepo=remi install -y redis-5.0.14
+    yum --enablerepo=remi install -y redis-5.0.3
   fi
   # 备份 redis 设置
   cp /etc/redis.conf /etc/redis.conf.bak.$(date +%Y%m%d)$(awk 'BEGIN { srand(); print int(rand()*32768) }' /dev/null)
@@ -1138,30 +1138,30 @@ other() {
 main() {
   welcome
   #config_nameserver
-  #system_update
-  #install_tools
-  #delete_useless_user
-  #disable_services
-  #disable_selinux
-  #root_sshkey
-  #create_user
-  #config_sshd
-  #config_bashrc
-  #config_vim
-  #config_timezone
+  system_update
+  install_tools
+  delete_useless_user
+  disable_services
+  disable_selinux
+  root_sshkey
+  create_user
+  config_sshd
+  config_bashrc
+  config_vim
+  config_timezone
   #disable_ipv6
   #config_ipadd
-  #config_ulimit
-  #config_firewall
-  #config_sysctl
+  config_ulimit
+  config_firewall
+  config_sysctl
   #install_nginx
-  #install_git
-  #install_golang
-  #install_mongodb
-  #config_mongodb_port
-  #install_mysql8
-  #config_mysql8_port_rootpasswd
-  #create_mysql_user
+  install_git
+  install_golang
+  install_mongodb
+  config_mongodb_port
+  install_mysql8
+  config_mysql8_port_rootpasswd
+  create_mysql_user
   install_redis
   config_redis_port
   config_redis_password
