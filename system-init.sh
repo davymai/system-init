@@ -445,10 +445,11 @@ config_sshd() {
   sed -i '/^#Port/s/#Port 22/Port '"$ssh_port"'/g' /etc/ssh/sshd_config
   sed -i '/^#PubkeyAuthentication/s/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
   sed -i '/^#UseDNS/s/#UseDNS yes/UseDNS no/g' /etc/ssh/sshd_config
-  sed -i '/^GSSAPIAuthentication/s/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
-  sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/g' /etc/ssh/sshd_config
   # 禁用密码登陆
   sed -i '/^PasswordAuthentication yes/s/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
+  sed -i 's/UsePAM.*/UsePAM yes/g' /etc/ssh/sshd_config
+  sed -i '/^GSSAPIAuthentication/s/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
+  sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/g' /etc/ssh/sshd_config
   # 禁止root用户登录
   if [ "$system_name" == "CentOS" ]; then
     sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
@@ -1222,8 +1223,10 @@ systemctl restart sshd
 ${Blue}*** 系统默认${Red}禁止 ${BYellow}root ${Blue}用户登陆, 需要root用户登陆请使用以下命令设置: ${White}"
 if [ "$system_name" == "CentOS" ]; then
   msg "sed -i 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"
+  
 else
-  msg "sed -i '/^PermitRootLogin no/s/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"
+  msg "sed -i '/^PermitRootLogin no/s/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config
+  sed -i '/^UsePAM yes/s/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config"
 fi
 msg "${Blue}================================${Color_off}
 ${Green}内网连接: ${Yellow}ssh -p $ssh_port -i ~/.ssh/私钥文件 $user_name@$local_ipadd${Color_off}
